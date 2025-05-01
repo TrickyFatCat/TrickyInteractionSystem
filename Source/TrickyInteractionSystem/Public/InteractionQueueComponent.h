@@ -105,7 +105,9 @@ private:
 	UPROPERTY(VisibleInstanceOnly, BlueprintGetter=GetInteractionQueue, Category="InteractionQueue")
 	TArray<AActor*> InteractionQueue;
 
-	static bool IsActorInteractive(AActor* Actor);
+	static bool IsActorInteractive(const AActor* Actor);
 
-	static bool GetActorInteractionData(AActor* InteractiveActor, FInteractionData& InteractionData);
+	static bool GetActorInteractionData(const AActor* InteractiveActor, FInteractionData& InteractionData);
+
+	void SortInteractionQueue();
 };

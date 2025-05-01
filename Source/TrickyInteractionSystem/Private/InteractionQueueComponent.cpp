@@ -32,6 +32,7 @@ bool UInteractionQueueComponent::AddToInteractionQueue(AActor* InteractiveActor)
 	}
 
 	InteractionQueue.Emplace(InteractiveActor);
+	SortInteractionQueue();
 	return true;
 }
 
@@ -42,7 +43,13 @@ bool UInteractionQueueComponent::RemoveFromInteractionQueue(AActor* InteractiveA
 		return false;
 	}
 
-	return InteractionQueue.RemoveSingle(InteractiveActor) > 0;
+	if (InteractionQueue.RemoveSingle(InteractiveActor) <= 0)
+	{
+		return false;
+	}
+
+	SortInteractionQueue();
+	return true;
 }
 
 
@@ -159,7 +166,7 @@ bool UInteractionQueueComponent::ForceInteraction()
 	return bIsSuccess;
 }
 
-bool UInteractionQueueComponent::IsActorInteractive(AActor* Actor)
+bool UInteractionQueueComponent::IsActorInteractive(const AActor* Actor)
 {
 	if (!IsValid(Actor) || !Actor->Implements<UTrickyInteractionInterface>())
 	{
@@ -170,7 +177,7 @@ bool UInteractionQueueComponent::IsActorInteractive(AActor* Actor)
 	return ITrickyInteractionInterface::Execute_GetInteractionData(Actor, InteractionData);
 }
 
-bool UInteractionQueueComponent::GetActorInteractionData(AActor* InteractiveActor, FInteractionData& InteractionData)
+bool UInteractionQueueComponent::GetActorInteractionData(const AActor* InteractiveActor, FInteractionData& InteractionData)
 {
 	if (!IsValid(InteractiveActor) || !InteractiveActor->Implements<UTrickyInteractionInterface>())
 	{
@@ -178,4 +185,23 @@ bool UInteractionQueueComponent::GetActorInteractionData(AActor* InteractiveActo
 	}
 
 	return ITrickyInteractionInterface::Execute_GetInteractionData(InteractiveActor, InteractionData);
+}
+
+void UInteractionQueueComponent::SortInteractionQueue()
+{
+	if (InteractionQueue.Num() <= 1)
+	{
+		return;
+	}
+
+	auto Predicate = [](const AActor* ActorA, const AActor* ActorB) -> bool
+	{
+		FInteractionData InteractionDataA;
+		GetActorInteractionData(ActorA, InteractionDataA);
+		FInteractionData InteractionDataB;
+		GetActorInteractionData(ActorB, InteractionDataB);
+		return InteractionDataA.InteractionWeight >= InteractionDataB.InteractionWeight;
+	};
+
+	InteractionQueue.Sort(Predicate);
 }
