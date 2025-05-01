@@ -6,7 +6,7 @@
 #include "UObject/Interface.h"
 #include "TrickyInteractionInterface.generated.h"
 
-USTRUCT()
+USTRUCT(Blueprintable)
 struct FInteractionData
 {
 	GENERATED_BODY()
@@ -46,9 +46,9 @@ public:
 	virtual bool StartInteraction_Implementation(AActor* Interactor);
 
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category="TrickyInteraction")
-	bool InterruptInteraction(AActor* Interruptor);
+	bool InterruptInteraction(AActor* Interruptor, AActor* Interactor);
 
-	virtual bool InterruptInteraction_Implementation(AActor* Interruptor);
+	virtual bool InterruptInteraction_Implementation(AActor* Interruptor, AActor* Interactor);
 
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category="TrickyInteraction")
 	bool FinishInteraction(AActor* Interactor);
@@ -60,8 +60,8 @@ public:
 
 	virtual bool ForceInteraction_Implementation(AActor* Interactor);
 
-	UFUNCTION(BuleprintPure, BlueprintImplementableEvent, Category="TrickyInteraction")
-	bool GetInteractionData(FInteractionData& InteractionData);
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category="TrickyInteraction")
+	bool GetInteractionData(FInteractionData& InteractionData) const;
 
-	virtual bool GetInteractionData_Implementation(FInteractionData& InteractionData);
+	virtual bool GetInteractionData_Implementation(FInteractionData& InteractionData) const;
 };

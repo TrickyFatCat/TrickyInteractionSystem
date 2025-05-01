@@ -9,7 +9,7 @@ bool ITrickyInteractionInterface::StartInteraction_Implementation(AActor* Intera
 	return false;
 }
 
-bool ITrickyInteractionInterface::InterruptInteraction_Implementation(AActor* Interruptor)
+bool ITrickyInteractionInterface::InterruptInteraction_Implementation(AActor* Interruptor, AActor* Interactor)
 {
 	return false;
 }
@@ -24,7 +24,7 @@ bool ITrickyInteractionInterface::ForceInteraction_Implementation(AActor* Intera
 	return false;
 }
 
-bool ITrickyInteractionInterface::GetInteractionData_Implementation(FInteractionData& InteractionData)
+bool ITrickyInteractionInterface::GetInteractionData_Implementation(FInteractionData& InteractionData) const
 {
 	return false;
 }

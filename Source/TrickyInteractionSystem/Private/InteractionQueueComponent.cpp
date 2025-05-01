@@ -42,7 +42,7 @@ bool UInteractionQueueComponent::RemoveFromInteractionQueue(AActor* InteractiveA
 		return false;
 	}
 
-	return InteractionQueue.RemoveSingle(InteractiveActor);
+	return InteractionQueue.RemoveSingle(InteractiveActor) > 0;
 }
 
 
@@ -105,11 +105,11 @@ bool UInteractionQueueComponent::FinishInteraction()
 	return bIsSuccess;
 }
 
-bool UInteractionQueueComponent::InterruptInteraction()
+bool UInteractionQueueComponent::InterruptInteraction(AActor* Interruptor)
 {
-	AActor* Interruptor = GetOwner();
+	AActor* Interactor = GetOwner();
 
-	if (IsInteractionQueueEmpty() || !IsValid(Interruptor))
+	if (IsInteractionQueueEmpty() || !IsValid(Interactor))
 	{
 		return false;
 	}
@@ -121,11 +121,13 @@ bool UInteractionQueueComponent::InterruptInteraction()
 		return false;
 	}
 
-	const bool bIsSuccess = ITrickyInteractionInterface::Execute_InterruptInteraction(InteractiveActor, Interruptor);
+	const bool bIsSuccess = ITrickyInteractionInterface::Execute_InterruptInteraction(InteractiveActor,
+		Interruptor,
+		Interactor);
 
 	if (bIsSuccess)
 	{
-		OnInteractionInterrupted.Broadcast(this, InteractiveActor);
+		OnInteractionInterrupted.Broadcast(this, InteractiveActor, Interruptor);
 	}
 
 	return bIsSuccess;

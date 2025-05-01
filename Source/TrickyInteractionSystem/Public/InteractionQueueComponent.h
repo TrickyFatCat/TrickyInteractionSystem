@@ -27,9 +27,10 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnInteractionFinishedDynamicSign
                                                AActor*, InteractievActor,
                                                bool, bIsSuccessful);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnInteractionInterruptedDynamicSignature,
-                                             UInteractionQueueComponent*, Component,
-                                             AActor*, InteractiveActor);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnInteractionInterruptedDynamicSignature,
+                                               UInteractionQueueComponent*, Component,
+                                               AActor*, InteractiveActor,
+                                               AActor*, Interruptor);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnInteractDynamicSignature,
                                                UInteractionQueueComponent*, Component,
@@ -52,10 +53,10 @@ public:
 	                           ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 
-	UPROPERTY(BuleprintAssignable, Category="InteractionQueue")
+	UPROPERTY(BlueprintAssignable, Category="InteractionQueue")
 	FOnActorAddedToInteractionQueueDynamicSignature OnActorAddedToInteractionQueue;
 
-	UPROPERTY(BuleprintAssignable, Category="InteractionQueue")
+	UPROPERTY(BlueprintAssignable, Category="InteractionQueue")
 	FOnActorRemovedFromInteractionQueueDynamicSignature OnActorRemovedFromInteractionQueue;
 
 	UPROPERTY(BlueprintAssignable, Category="InteractionQueue")
@@ -95,13 +96,13 @@ public:
 	bool FinishInteraction();
 
 	UFUNCTION(BlueprintCallable, Category="InteractionQueue")
-	bool InterruptInteraction();
+	bool InterruptInteraction(AActor* Interruptor);
 
 	UFUNCTION(BlueprintCallable, Category="InteractionQueue")
 	bool ForceInteraction();
 
 private:
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="InteractionQueue")
+	UPROPERTY(VisibleInstanceOnly, BlueprintGetter=GetInteractionQueue, Category="InteractionQueue")
 	TArray<AActor*> InteractionQueue;
 
 	static bool IsActorInteractive(AActor* Actor);
