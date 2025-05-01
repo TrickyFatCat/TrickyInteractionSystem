@@ -8,11 +8,15 @@
 UInteractionQueueComponent::UInteractionQueueComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bStartWithTickEnabled = false;
+	PrimaryComponentTick.TickInterval = 0.05f;
 }
 
 void UInteractionQueueComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
+
+	SetComponentTickEnabled(false);
 }
 
 
@@ -33,6 +37,8 @@ bool UInteractionQueueComponent::AddToInteractionQueue(AActor* InteractiveActor)
 
 	InteractionQueue.Emplace(InteractiveActor);
 	SortInteractionQueue();
+	SetComponentTickEnabled(true);
+	OnActorAddedToInteractionQueue.Broadcast(this, InteractiveActor);
 	return true;
 }
 
@@ -49,6 +55,13 @@ bool UInteractionQueueComponent::RemoveFromInteractionQueue(AActor* InteractiveA
 	}
 
 	SortInteractionQueue();
+	OnActorRemovedFromInteractionQueue.Broadcast(this, InteractiveActor);
+
+	if (IsInteractionQueueEmpty())
+	{
+		SetComponentTickEnabled(false);
+	}
+	
 	return true;
 }
 
@@ -61,6 +74,16 @@ bool UInteractionQueueComponent::IsInInteractionQueue(AActor* InteractiveActor)
 	}
 
 	return InteractionQueue.Contains(InteractiveActor);
+}
+
+void UInteractionQueueComponent::SetUseLineOfSight(bool Value)
+{
+	if (bUseLineOfSight == Value)
+	{
+		return;
+	}
+
+	bUseLineOfSight = Value;
 }
 
 bool UInteractionQueueComponent::StartInteraction()

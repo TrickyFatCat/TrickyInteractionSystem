@@ -8,10 +8,9 @@
 
 struct FInteractionData;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnActorAddedToInteractionQueueDynamicSignature,
-                                               UInteractionQueueComponent*, Component,
-                                               AActor*, InteractiveActor,
-                                               const FInteractionData&, InteractionData);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActorAddedToInteractionQueueDynamicSignature,
+                                             UInteractionQueueComponent*, Component,
+                                             AActor*, InteractiveActor);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActorRemovedFromInteractionQueueDynamicSignature,
                                              UInteractionQueueComponent*, Component,
@@ -80,11 +79,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category="InteractionQueue")
 	bool IsInInteractionQueue(AActor* InteractiveActor);
 
-	UFUNCTION(BlueprintGetter)
+	UFUNCTION(BlueprintGetter, Category="InteractionQueue")
 	TArray<AActor*> GetInteractionQueue() const
 	{
 		return InteractionQueue;
 	};
+
+	UFUNCTION(BlueprintGetter, Category="InteractionQueue")
+	bool GetUseLineOfSight() const { return bUseLineOfSight; };
+
+	UFUNCTION(BlueprintSetter, Category="InteractionQueue")
+	void SetUseLineOfSight(bool Value);
 
 	UFUNCTION(BlueprintPure, Category="InteractionQueue")
 	bool IsInteractionQueueEmpty() const { return InteractionQueue.IsEmpty(); };
@@ -102,6 +107,12 @@ public:
 	bool ForceInteraction();
 
 private:
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintGetter=GetUseLineOfSight,
+		BlueprintSetter=SetUseLineOfSight,
+		Category="InteractionQueue")
+	bool bUseLineOfSight = false;
+
 	UPROPERTY(VisibleInstanceOnly, BlueprintGetter=GetInteractionQueue, Category="InteractionQueue")
 	TArray<AActor*> InteractionQueue;
 
