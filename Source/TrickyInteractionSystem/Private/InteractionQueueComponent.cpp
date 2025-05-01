@@ -202,6 +202,6 @@ void UInteractionQueueComponent::SortInteractionQueue()
 		GetActorInteractionData(ActorB, InteractionDataB);
 		return InteractionDataA.InteractionWeight >= InteractionDataB.InteractionWeight;
 	};
-
-	InteractionQueue.Sort(Predicate);
+	
+	Algo::Sort(InteractionQueue, Predicate);
 }
