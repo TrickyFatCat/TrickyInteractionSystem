@@ -4,8 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "InteractionQueueComponent.generated.h"
 
+namespace EDrawDebugTrace
+{
+	enum Type : int;
+}
+
+class UCameraComponent;
 struct FInteractionData;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActorAddedToInteractionQueueDynamicSignature,
@@ -106,19 +113,57 @@ public:
 	UFUNCTION(BlueprintCallable, Category="InteractionQueue")
 	bool ForceInteraction();
 
+	UFUNCTION(BlueprintCallable, Category="InteractionQueue")
+	void RegisterCamera(UCameraComponent* Camera);
+
 private:
+	UPROPERTY(VisibleInstanceOnly, BlueprintGetter=GetInteractionQueue, Category="InteractionQueue")
+	TArray<AActor*> InteractionQueue;
+	
 	UPROPERTY(EditDefaultsOnly,
 		BlueprintGetter=GetUseLineOfSight,
 		BlueprintSetter=SetUseLineOfSight,
 		Category="InteractionQueue")
 	bool bUseLineOfSight = false;
+	
+	UPROPERTY()
+	TObjectPtr<UCameraComponent> CameraComponent = nullptr;
 
-	UPROPERTY(VisibleInstanceOnly, BlueprintGetter=GetInteractionQueue, Category="InteractionQueue")
-	TArray<AActor*> InteractionQueue;
+	UPROPERTY(EditDefaultsOnly, Category="InteractionQueue", meta=(EditCondition="bUseLineOfSight"))
+	ETraceTypeQuery TraceChannel = TraceTypeQuery1;
+
+	UPROPERTY(EditDefaultsOnly, Category="InteractionQueue", meta=(ClampMin=1, UIMin=1, EditCondition="bUseLineOfSight"))
+	float LineOfSightDistance = 500.f;
+
+	UPROPERTY(EditDefaultsOnly, Category="InteractionQueue", meta=((ClampMin=1, UIMin=1, EditCondition="bUseLineOfSight"))
+	float LineOfSightRadius = 32.f;
+
+	UPROPERTY(EditDefaultsOnly, Category="InteractionQueue", AdvancedDisplay, meta=(EditCondition="bUseLineOfSight"))
+	TEnumAsByte<EDrawDebugTrace::Type> DrawDebugType = EDrawDebugTrace::Type::None;
+	
+	UPROPERTY(EditDefaultsOnly, Category="InteractionQueue", AdvancedDisplay, meta=(EditCondition="bUseLineOfSight"))
+	FLinearColor TraceColor = FColor::Red;
+
+	UPROPERTY(EditDefaultsOnly, Category="InteractionQueue", AdvancedDisplay, meta=(EditCondition="bUseLineOfSight"))
+	FLinearColor TraceHitColor = FColor::Green;
+
+	UPROPERTY(EditDefaultsOnly, Category="InteractionQueue", AdvancedDisplay, meta=(EditCondition="bUseLineOfSight"))
+	float DrawTime = 0.05f;
+
+	UPROPERTY(Transient)
+	AActor* ActorInSight = nullptr;
+	
+	UPROPERTY()
+	TArray<AActor*> ActorsToIgnore;
 
 	static bool IsActorInteractive(const AActor* Actor);
 
 	static bool GetActorInteractionData(const AActor* InteractiveActor, FInteractionData& InteractionData);
 
 	void SortInteractionQueue();
+
+	void ToggleComponentTick();
+
+	void CheckLineOfSight(const float DeltaTime, FHitResult& OutHitResult);
+
 };

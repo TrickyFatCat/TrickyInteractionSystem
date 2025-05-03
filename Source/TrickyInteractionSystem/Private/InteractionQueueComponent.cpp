@@ -4,12 +4,14 @@
 #include "InteractionQueueComponent.h"
 
 #include "TrickyInteractionInterface.h"
+#include "Camera/CameraComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 UInteractionQueueComponent::UInteractionQueueComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.bStartWithTickEnabled = false;
-	PrimaryComponentTick.TickInterval = 0.05f;
+	PrimaryComponentTick.TickInterval = 0.1f;
 }
 
 void UInteractionQueueComponent::InitializeComponent()
@@ -17,6 +19,7 @@ void UInteractionQueueComponent::InitializeComponent()
 	Super::InitializeComponent();
 
 	SetComponentTickEnabled(false);
+	ActorsToIgnore.AddUnique(GetOwner());
 }
 
 
@@ -25,6 +28,26 @@ void UInteractionQueueComponent::TickComponent(float DeltaTime,
                                                FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	FHitResult HitResult;
+	CheckLineOfSight(DeltaTime, HitResult);
+
+	if (HitResult.bBlockingHit)
+	{
+		ActorInSight = HitResult.GetActor();
+
+		if (IsActorInteractive(ActorInSight) && IsInInteractionQueue(ActorInSight))
+		{
+			FInteractionData InteractionData;
+			GetActorInteractionData(ActorInSight, InteractionData);
+
+			if (InteractionData.bRequiresLineOfSight)
+			{
+				const int32 Index = InteractionQueue.IndexOfByKey(ActorInSight);
+				InteractionQueue.Swap(Index, 0);
+			}
+		}
+	}
 }
 
 
@@ -37,7 +60,7 @@ bool UInteractionQueueComponent::AddToInteractionQueue(AActor* InteractiveActor)
 
 	InteractionQueue.Emplace(InteractiveActor);
 	SortInteractionQueue();
-	SetComponentTickEnabled(true);
+	ToggleComponentTick();
 	OnActorAddedToInteractionQueue.Broadcast(this, InteractiveActor);
 	return true;
 }
@@ -61,7 +84,7 @@ bool UInteractionQueueComponent::RemoveFromInteractionQueue(AActor* InteractiveA
 	{
 		SetComponentTickEnabled(false);
 	}
-	
+
 	return true;
 }
 
@@ -101,12 +124,19 @@ bool UInteractionQueueComponent::StartInteraction()
 	{
 		return false;
 	}
+	
+	FInteractionData InteractionData;
+	GetActorInteractionData(InteractiveActor, InteractionData);
+
+	if (InteractionData.bRequiresLineOfSight && InteractiveActor != ActorInSight)
+	{
+		return false;
+	}
 
 	const bool bIsSuccess = ITrickyInteractionInterface::Execute_StartInteraction(InteractiveActor, Interactor);
 
 	if (bIsSuccess)
 	{
-		FInteractionData InteractionData;
 		GetActorInteractionData(InteractiveActor, InteractionData);
 		OnInteractionStarted.Broadcast(this, InteractiveActor, InteractionData);
 	}
@@ -179,6 +209,14 @@ bool UInteractionQueueComponent::ForceInteraction()
 		return false;
 	}
 
+	FInteractionData InteractionData;
+	GetActorInteractionData(InteractiveActor, InteractionData);
+
+	if (InteractionData.bRequiresLineOfSight && InteractiveActor != ActorInSight)
+	{
+		return false;
+	}
+	
 	const bool bIsSuccess = ITrickyInteractionInterface::Execute_ForceInteraction(InteractiveActor, Interactor);
 
 	if (bIsSuccess)
@@ -187,6 +225,17 @@ bool UInteractionQueueComponent::ForceInteraction()
 	}
 
 	return bIsSuccess;
+}
+
+void UInteractionQueueComponent::RegisterCamera(UCameraComponent* Camera)
+{
+	if (!IsValid(Camera))
+	{
+		return;
+	}
+
+	CameraComponent = Camera;
+	ActorsToIgnore.AddUnique(CameraComponent->GetOwner());
 }
 
 bool UInteractionQueueComponent::IsActorInteractive(const AActor* Actor)
@@ -200,7 +249,8 @@ bool UInteractionQueueComponent::IsActorInteractive(const AActor* Actor)
 	return ITrickyInteractionInterface::Execute_GetInteractionData(Actor, InteractionData);
 }
 
-bool UInteractionQueueComponent::GetActorInteractionData(const AActor* InteractiveActor, FInteractionData& InteractionData)
+bool UInteractionQueueComponent::GetActorInteractionData(const AActor* InteractiveActor,
+                                                         FInteractionData& InteractionData)
 {
 	if (!IsValid(InteractiveActor) || !InteractiveActor->Implements<UTrickyInteractionInterface>())
 	{
@@ -225,6 +275,44 @@ void UInteractionQueueComponent::SortInteractionQueue()
 		GetActorInteractionData(ActorB, InteractionDataB);
 		return InteractionDataA.InteractionWeight >= InteractionDataB.InteractionWeight;
 	};
-	
+
 	Algo::Sort(InteractionQueue, Predicate);
+}
+
+void UInteractionQueueComponent::ToggleComponentTick()
+{
+	if (!IsValid(CameraComponent))
+	{
+		return;
+	}
+
+	SetComponentTickEnabled(bUseLineOfSight && !IsInteractionQueueEmpty() && !IsComponentTickEnabled());
+}
+
+void UInteractionQueueComponent::CheckLineOfSight(const float DeltaTime, FHitResult& OutHitResult)
+{
+	if (!IsValid(CameraComponent))
+	{
+		return;
+	}
+
+	FMinimalViewInfo ViewInfo;
+	CameraComponent->GetCameraView(DeltaTime, ViewInfo);
+
+	const FVector StartPoint = ViewInfo.Location;
+	const FVector EndPoint = ViewInfo.Location + ViewInfo.Rotation.Vector() * LineOfSightDistance;
+
+	UKismetSystemLibrary::SphereTraceSingle(GetOwner(),
+	                                        StartPoint,
+	                                        EndPoint,
+	                                        LineOfSightRadius,
+	                                        TraceChannel,
+	                                        false,
+	                                        ActorsToIgnore,
+	                                        DrawDebugType,
+	                                        OutHitResult,
+	                                        true,
+	                                        TraceColor,
+	                                        TraceHitColor,
+	                                        DrawTime);
 }
