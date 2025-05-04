@@ -11,12 +11,22 @@ struct FInteractionData
 {
 	GENERATED_BODY()
 
+	/**
+	 * Holds the text that will be shown to the player as a prompt or description
+	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="InteractionData")
 	FText InteractionMessage = FText::FromString("Interact");
 
+	/**
+	 * If true, the interaction will only be allowed if the interactive actor is in the line of sight
+	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="InteractionData")
 	bool bRequiresLineOfSight = false;
 
+	/**
+	 * Determines the interaction weight, which is used to sort the interaction queue
+	 * The higher the value, the higher the priority is.
+	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="InteractionData", meta=(ClampMin=0, UIMin=0))
 	int32 InteractionWeight = 0;
 };
