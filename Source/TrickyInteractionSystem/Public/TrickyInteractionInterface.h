@@ -11,16 +11,19 @@ struct FInteractionData
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite, Category="InteractionData")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="InteractionData")
 	FText InteractionMessage = FText::FromString("Interact");
-	
-	UPROPERTY(BlueprintReadWrite, Category="InteractionData", meta=(ClampMin=0, UIMin=0, ClampMax=99, UIMax=99))
+
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintReadWrite,
+		Category="InteractionData",
+		meta=(ClampMin=0, UIMin=0, ClampMax=99, UIMax=99))
 	float InteractionTime = 0.f;
 
-	UPROPERTY(BlueprintReadWrite, Category="InteractionData")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="InteractionData")
 	bool bRequiresLineOfSight = false;
 
-	UPROPERTY(BlueprintReadWrite, Category="InteractionData", meta=(ClampMin=0, UIMin=0))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="InteractionData", meta=(ClampMin=0, UIMin=0))
 	int32 InteractionWeight = 0;
 };
 
