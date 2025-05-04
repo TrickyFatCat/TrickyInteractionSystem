@@ -130,12 +130,12 @@ private:
 	TObjectPtr<UCameraComponent> CameraComponent = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, Category="InteractionQueue", meta=(EditCondition="bUseLineOfSight"))
-	ETraceTypeQuery TraceChannel = TraceTypeQuery1;
+	TEnumAsByte<ETraceTypeQuery> TraceChannel = ETraceTypeQuery::TraceTypeQuery1;
 
 	UPROPERTY(EditDefaultsOnly, Category="InteractionQueue", meta=(ClampMin=1, UIMin=1, EditCondition="bUseLineOfSight"))
 	float LineOfSightDistance = 500.f;
 
-	UPROPERTY(EditDefaultsOnly, Category="InteractionQueue", meta=((ClampMin=1, UIMin=1, EditCondition="bUseLineOfSight"))
+	UPROPERTY(EditDefaultsOnly, Category="InteractionQueue", meta=(ClampMin=1, UIMin=1, EditCondition="bUseLineOfSight"))
 	float LineOfSightRadius = 32.f;
 
 	UPROPERTY(EditDefaultsOnly, Category="InteractionQueue", AdvancedDisplay, meta=(EditCondition="bUseLineOfSight"))
