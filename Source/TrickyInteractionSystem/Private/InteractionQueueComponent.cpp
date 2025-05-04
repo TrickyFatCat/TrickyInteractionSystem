@@ -67,7 +67,12 @@ bool UInteractionQueueComponent::AddToInteractionQueue(AActor* InteractiveActor)
 
 	InteractionQueue.Emplace(InteractiveActor);
 	SortInteractionQueue();
-	ToggleComponentTick();
+
+	if (bUseLineOfSight && !IsComponentTickEnabled())
+	{
+		ToggleComponentTick();
+	}
+	
 	OnActorAddedToInteractionQueue.Broadcast(this, InteractiveActor);
 	return true;
 }
