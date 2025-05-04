@@ -14,12 +14,6 @@ struct FInteractionData
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="InteractionData")
 	FText InteractionMessage = FText::FromString("Interact");
 
-	UPROPERTY(EditDefaultsOnly,
-		BlueprintReadWrite,
-		Category="InteractionData",
-		meta=(ClampMin=0, UIMin=0, ClampMax=99, UIMax=99))
-	float InteractionTime = 0.f;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="InteractionData")
 	bool bRequiresLineOfSight = false;
 
