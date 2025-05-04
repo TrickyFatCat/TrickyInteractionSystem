@@ -5,6 +5,7 @@
 
 #include "TrickyInteractionInterface.h"
 #include "Camera/CameraComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 UInteractionQueueComponent::UInteractionQueueComponent()
@@ -34,7 +35,13 @@ void UInteractionQueueComponent::TickComponent(float DeltaTime,
 
 	if (HitResult.bBlockingHit)
 	{
-		ActorInSight = HitResult.GetActor();
+		const FVector TraceDirection = UKismetMathLibrary::GetDirectionUnitVector(
+			GetOwner()->GetActorLocation(), HitResult.TraceEnd);
+		const FVector ImpactDirection = UKismetMathLibrary::GetDirectionUnitVector(GetOwner()->GetActorLocation(),
+			HitResult.Location);
+		const float DotProduct = FVector::DotProduct(TraceDirection, ImpactDirection);
+		
+		ActorInSight = DotProduct < 0.f ? nullptr : HitResult.GetActor();
 
 		if (IsActorInteractive(ActorInSight) && IsInInteractionQueue(ActorInSight))
 		{
@@ -124,7 +131,7 @@ bool UInteractionQueueComponent::StartInteraction()
 	{
 		return false;
 	}
-	
+
 	FInteractionData InteractionData;
 	GetActorInteractionData(InteractiveActor, InteractionData);
 
@@ -216,7 +223,7 @@ bool UInteractionQueueComponent::ForceInteraction()
 	{
 		return false;
 	}
-	
+
 	const bool bIsSuccess = ITrickyInteractionInterface::Execute_ForceInteraction(InteractiveActor, Interactor);
 
 	if (bIsSuccess)
