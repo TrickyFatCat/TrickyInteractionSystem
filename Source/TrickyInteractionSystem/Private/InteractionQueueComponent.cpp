@@ -232,12 +232,7 @@ bool UInteractionQueueComponent::ForceInteraction()
 	}
 
 	const bool bIsSuccess = ITrickyInteractionInterface::Execute_ForceInteraction(InteractiveActor, Interactor);
-
-	if (bIsSuccess)
-	{
-		OnInteract.Broadcast(this, InteractiveActor, bIsSuccess);
-	}
-
+	OnInteractionForced.Broadcast(this, InteractiveActor, bIsSuccess);
 	return bIsSuccess;
 }
 

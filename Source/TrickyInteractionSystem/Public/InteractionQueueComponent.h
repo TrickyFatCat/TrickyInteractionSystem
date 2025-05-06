@@ -38,7 +38,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnInteractionInterruptedDynamicS
                                                AActor*, InteractiveActor,
                                                AActor*, Interruptor);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnInteractDynamicSignature,
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnInteractionForcedDynamicSignature,
                                                UInteractionQueueComponent*, Component,
                                                AActor*, InteractiveActor,
                                                bool, bIsSuccessful);
@@ -75,7 +75,7 @@ public:
 	FOnInteractionInterruptedDynamicSignature OnInteractionInterrupted;
 
 	UPROPERTY(BlueprintAssignable, Category="InteractionQueue")
-	FOnInteractDynamicSignature OnInteract;
+	FOnInteractionForcedDynamicSignature OnInteractionForced;
 
 	UFUNCTION(BlueprintCallable, Category="InteractionQueue")
 	bool AddToInteractionQueue(AActor* InteractiveActor);
