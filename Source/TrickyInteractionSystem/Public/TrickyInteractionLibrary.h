@@ -23,6 +23,15 @@ public:
 	static bool GetActorInteractionData(const AActor* Actor,
 	                                    FInteractionData& InteractionData);
 
+	UFUNCTION(BlueprintCallable, Category="TrickyInteraction", meta=(WorldContext="Actor"))
+	static bool AddToInteractionQueue(AActor* Interactor, AActor* InteractiveActor);
+
+	UFUNCTION(BlueprintCallable, Category="TrickyInteraction", meta=(WorldContext="Actor"))
+	static bool RemoveFromInteractionQueue(AActor* Interactor, AActor* InteractiveActor);
+
+	UFUNCTION(BlueprintCallable, Category="TrickyInteraction", meta=(WorldContext="Actor"))
+	static UInteractionQueueComponent* GetInteractionQueueComponent(const AActor* Actor);
+
 private:
 	const FString InteractionDataName = "InteractionData";
 };

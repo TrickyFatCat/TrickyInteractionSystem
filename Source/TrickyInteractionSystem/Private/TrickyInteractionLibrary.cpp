@@ -3,6 +3,7 @@
 
 #include "TrickyInteractionLibrary.h"
 
+#include "InteractionQueueComponent.h"
 #include "TrickyInteractionInterface.h"
 
 bool UTrickyInteractionLibrary::IsActorInteractive(const AActor* Actor)
@@ -48,4 +49,48 @@ bool UTrickyInteractionLibrary::GetActorInteractionData(const AActor* Actor, FIn
 
 	InteractionData = *StructProperty->ContainerPtrToValuePtr<FInteractionData>(Actor);
 	return true;
+}
+
+bool UTrickyInteractionLibrary::AddToInteractionQueue(AActor* Interactor, AActor* InteractiveActor)
+{
+	if (!IsValid(Interactor) || !IsValid(InteractiveActor))
+	{
+		return false;
+	}
+
+	UInteractionQueueComponent* InteractionQueueComp = GetInteractionQueueComponent(Interactor);
+
+	if (!IsValid(InteractionQueueComp))
+	{
+		return false;
+	}
+
+	return InteractionQueueComp->AddToInteractionQueue(InteractiveActor);
+}
+
+bool UTrickyInteractionLibrary::RemoveFromInteractionQueue(AActor* Interactor, AActor* InteractiveActor)
+{
+	if (!IsValid(Interactor) || !IsValid(InteractiveActor))
+	{
+		return false;
+	}
+
+	UInteractionQueueComponent* InteractionQueueComp = GetInteractionQueueComponent(Interactor);
+
+	if (!IsValid(InteractionQueueComp))
+	{
+		return false;
+	}
+
+	return InteractionQueueComp->RemoveFromInteractionQueue(InteractiveActor);
+}
+
+UInteractionQueueComponent* UTrickyInteractionLibrary::GetInteractionQueueComponent(const AActor* Actor)
+{
+	if (!IsValid(Actor))
+	{
+		return nullptr;
+	}
+
+	return Actor->FindComponentByClass<UInteractionQueueComponent>();
 }
