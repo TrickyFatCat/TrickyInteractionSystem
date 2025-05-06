@@ -59,32 +59,65 @@ public:
 	                           ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 
+	/**
+	 * Called when a new interactive actor is added to the interaction queue
+	 */
 	UPROPERTY(BlueprintAssignable, Category="InteractionQueue")
 	FOnActorAddedToInteractionQueueDynamicSignature OnActorAddedToInteractionQueue;
 
+	/**
+	 * Called when an interactive actor is removed from the interaction queue
+	 */
 	UPROPERTY(BlueprintAssignable, Category="InteractionQueue")
 	FOnActorRemovedFromInteractionQueueDynamicSignature OnActorRemovedFromInteractionQueue;
 
+	/**
+	 * Called when interaction successfully started
+	 */
 	UPROPERTY(BlueprintAssignable, Category="InteractionQueue")
 	FOnInteractionStartedDynamicSignature OnInteractionStarted;
 
+	/**
+	 * Called when interaction finished
+	 */
 	UPROPERTY(BlueprintAssignable, Category="InteractionQueue")
 	FOnInteractionFinishedDynamicSignature OnInteractionFinished;
 
+	/**
+	 * Called when interaction successfully interrupted
+	 */
 	UPROPERTY(BlueprintAssignable, Category="InteractionQueue")
 	FOnInteractionInterruptedDynamicSignature OnInteractionInterrupted;
 
+	/**
+	 * Called when interaction is forced
+	 */
 	UPROPERTY(BlueprintAssignable, Category="InteractionQueue")
 	FOnInteractionForcedDynamicSignature OnInteractionForced;
 
+	/**
+	 * Adds a new interactive actor to the interaction queue
+	 * @param InteractiveActor An interactive actor to add. Must be a valid actor
+	 * @return True if the interactive actor was successfully added
+	 */
 	UFUNCTION(BlueprintCallable, Category="InteractionQueue")
 	bool AddToInteractionQueue(AActor* InteractiveActor);
 
+	/**
+	 * Removes an interactive actor to the interaction queue
+	 * @param InteractiveActor An interactive actor to remove. Must be a valid actor
+	 * @return True if the interactive actor was successfully removed
+	 */
 	UFUNCTION(BlueprintCallable, Category="InteractionQueue")
 	bool RemoveFromInteractionQueue(AActor* InteractiveActor);
 
+	/**
+	 * Checks if a given actor is in the interaction queue
+	 * @param Actor An interactive actor to check
+	 * @return True if the actor is in the interaction queue
+	 */
 	UFUNCTION(BlueprintCallable, Category="InteractionQueue")
-	bool IsInInteractionQueue(AActor* InteractiveActor);
+	bool IsInInteractionQueue(AActor* Actor);
 
 	UFUNCTION(BlueprintGetter, Category="InteractionQueue")
 	TArray<AActor*> GetInteractionQueue() const
@@ -101,25 +134,50 @@ public:
 	UFUNCTION(BlueprintPure, Category="InteractionQueue")
 	bool IsInteractionQueueEmpty() const { return InteractionQueue.IsEmpty(); };
 
+	/**
+	 * Starts interaction with the first actor in the interaction queue
+	 * @return result of the interaction start
+	 */
 	UFUNCTION(BlueprintCallable, Category="InteractionQueue")
 	bool StartInteraction();
 
+	/**
+	 * Starts interaction with the first actor in the interaction queue
+	 * @return result of the interaction finish
+	 */
 	UFUNCTION(BlueprintCallable, Category="InteractionQueue")
 	bool FinishInteraction();
 
+	/**
+	 * Interrupts current interaction sequence
+	 * @param Interruptor An actor which interrupts the interaction
+	 * @return true if the interaction is successfully interrupted
+	 */
 	UFUNCTION(BlueprintCallable, Category="InteractionQueue")
 	bool InterruptInteraction(AActor* Interruptor);
 
+	/**
+	 * Forces interaction with the first actor in the interaciton queue
+	 * Usually used for immediate interactions which don't require animations
+	 * @return result of the interaciton
+	 */
 	UFUNCTION(BlueprintCallable, Category="InteractionQueue")
 	bool ForceInteraction();
 
+	/**
+	 * Registers a camera which will be used for the line of sight check
+	 * @param Camera Camera component to register
+	 */
 	UFUNCTION(BlueprintCallable, Category="InteractionQueue")
 	void RegisterCamera(UCameraComponent* Camera);
 
 private:
 	UPROPERTY(VisibleInstanceOnly, BlueprintGetter=GetInteractionQueue, Category="InteractionQueue")
 	TArray<AActor*> InteractionQueue;
-	
+
+	/**
+	 * If true, the line of sight checks will be enabled if InteractionQueue isn't empty
+	 */
 	UPROPERTY(EditDefaultsOnly,
 		BlueprintGetter=GetUseLineOfSight,
 		BlueprintSetter=SetUseLineOfSight,
@@ -129,24 +187,45 @@ private:
 	UPROPERTY()
 	TObjectPtr<UCameraComponent> CameraComponent = nullptr;
 
+	/**
+	 * The trace channel used for line of sight checks
+	 */
 	UPROPERTY(EditDefaultsOnly, Category="InteractionQueue", meta=(EditCondition="bUseLineOfSight"))
 	TEnumAsByte<ETraceTypeQuery> TraceChannel = ETraceTypeQuery::TraceTypeQuery1;
 
+	/**
+	 * Distance of the sphere trace which is used for line of sight checks
+	 */
 	UPROPERTY(EditDefaultsOnly, Category="InteractionQueue", meta=(ClampMin=1, UIMin=1, EditCondition="bUseLineOfSight"))
 	float LineOfSightDistance = 500.f;
 
+	/**
+	 * Radius of the sphere trace which is used for line of sight checks
+	 */
 	UPROPERTY(EditDefaultsOnly, Category="InteractionQueue", meta=(ClampMin=1, UIMin=1, EditCondition="bUseLineOfSight"))
 	float LineOfSightRadius = 32.f;
 
+	/**
+	 * Defines the type of debug to use for line of sigh check
+	 */
 	UPROPERTY(EditDefaultsOnly, Category="InteractionQueue", AdvancedDisplay, meta=(EditCondition="bUseLineOfSight"))
 	TEnumAsByte<EDrawDebugTrace::Type> DrawDebugType = EDrawDebugTrace::Type::None;
-	
+
+	/**
+	 * Color of the debug trace
+	 */
 	UPROPERTY(EditDefaultsOnly, Category="InteractionQueue", AdvancedDisplay, meta=(EditCondition="bUseLineOfSight"))
 	FLinearColor TraceColor = FColor::Red;
 
+	/**
+	 * Color of the debug tarce when the hit was registered
+	 */
 	UPROPERTY(EditDefaultsOnly, Category="InteractionQueue", AdvancedDisplay, meta=(EditCondition="bUseLineOfSight"))
 	FLinearColor TraceHitColor = FColor::Green;
 
+	/**
+	 * How long the debug trace will be drawn
+	 */
 	UPROPERTY(EditDefaultsOnly, Category="InteractionQueue", AdvancedDisplay, meta=(EditCondition="bUseLineOfSight"))
 	float DrawTime = 0.05f;
 

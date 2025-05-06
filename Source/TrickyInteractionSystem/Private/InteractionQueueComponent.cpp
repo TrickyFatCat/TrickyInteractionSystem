@@ -103,14 +103,14 @@ bool UInteractionQueueComponent::RemoveFromInteractionQueue(AActor* InteractiveA
 }
 
 
-bool UInteractionQueueComponent::IsInInteractionQueue(AActor* InteractiveActor)
+bool UInteractionQueueComponent::IsInInteractionQueue(AActor* Actor)
 {
-	if (!UTrickyInteractionLibrary::IsActorInteractive(InteractiveActor))
+	if (!UTrickyInteractionLibrary::IsActorInteractive(Actor))
 	{
 		return false;
 	}
 
-	return InteractionQueue.Contains(InteractiveActor);
+	return InteractionQueue.Contains(Actor);
 }
 
 void UInteractionQueueComponent::SetUseLineOfSight(bool Value)
