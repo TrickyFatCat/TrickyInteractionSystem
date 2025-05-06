@@ -156,14 +156,9 @@ private:
 	UPROPERTY()
 	TArray<AActor*> ActorsToIgnore;
 
-	static bool IsActorInteractive(const AActor* Actor);
-
-	static bool GetActorInteractionData(const AActor* InteractiveActor, FInteractionData& InteractionData);
-
 	void SortInteractionQueue();
 
 	void ToggleComponentTick();
 
-	void CheckLineOfSight(const float DeltaTime, FHitResult& OutHitResult);
-
+	void CheckLineOfSight(const float DeltaTime, FHitResult& OutHitResult) const;
 };

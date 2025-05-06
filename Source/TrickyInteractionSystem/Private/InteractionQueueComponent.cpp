@@ -4,6 +4,7 @@
 #include "InteractionQueueComponent.h"
 
 #include "TrickyInteractionInterface.h"
+#include "TrickyInteractionLibrary.h"
 #include "Camera/CameraComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -40,13 +41,12 @@ void UInteractionQueueComponent::TickComponent(float DeltaTime,
 		const FVector ImpactDirection = UKismetMathLibrary::GetDirectionUnitVector(GetOwner()->GetActorLocation(),
 			HitResult.Location);
 		const float DotProduct = FVector::DotProduct(TraceDirection, ImpactDirection);
-		
 		ActorInSight = DotProduct < 0.f ? nullptr : HitResult.GetActor();
 
-		if (IsActorInteractive(ActorInSight) && IsInInteractionQueue(ActorInSight))
+		if (UTrickyInteractionLibrary::IsActorInteractive(ActorInSight) && IsInInteractionQueue(ActorInSight))
 		{
 			FInteractionData InteractionData;
-			GetActorInteractionData(ActorInSight, InteractionData);
+			UTrickyInteractionLibrary::GetActorInteractionData(ActorInSight, InteractionData);
 
 			if (InteractionData.bRequiresLineOfSight)
 			{
@@ -60,7 +60,7 @@ void UInteractionQueueComponent::TickComponent(float DeltaTime,
 
 bool UInteractionQueueComponent::AddToInteractionQueue(AActor* InteractiveActor)
 {
-	if (!IsActorInteractive(InteractiveActor) || IsInInteractionQueue(InteractiveActor))
+	if (!UTrickyInteractionLibrary::IsActorInteractive(InteractiveActor) || IsInInteractionQueue(InteractiveActor))
 	{
 		return false;
 	}
@@ -72,14 +72,16 @@ bool UInteractionQueueComponent::AddToInteractionQueue(AActor* InteractiveActor)
 	{
 		ToggleComponentTick();
 	}
-	
+
 	OnActorAddedToInteractionQueue.Broadcast(this, InteractiveActor);
 	return true;
 }
 
 bool UInteractionQueueComponent::RemoveFromInteractionQueue(AActor* InteractiveActor)
 {
-	if (!IsActorInteractive(InteractiveActor) || !IsInInteractionQueue(InteractiveActor) || IsInteractionQueueEmpty())
+	const bool bIsInteractiveActor = UTrickyInteractionLibrary::IsActorInteractive(InteractiveActor);
+
+	if (!bIsInteractiveActor || !IsInInteractionQueue(InteractiveActor) || IsInteractionQueueEmpty())
 	{
 		return false;
 	}
@@ -103,7 +105,7 @@ bool UInteractionQueueComponent::RemoveFromInteractionQueue(AActor* InteractiveA
 
 bool UInteractionQueueComponent::IsInInteractionQueue(AActor* InteractiveActor)
 {
-	if (!IsActorInteractive(InteractiveActor))
+	if (!UTrickyInteractionLibrary::IsActorInteractive(InteractiveActor))
 	{
 		return false;
 	}
@@ -138,7 +140,7 @@ bool UInteractionQueueComponent::StartInteraction()
 	}
 
 	FInteractionData InteractionData;
-	GetActorInteractionData(InteractiveActor, InteractionData);
+	UTrickyInteractionLibrary::GetActorInteractionData(InteractiveActor, InteractionData);
 
 	if (InteractionData.bRequiresLineOfSight && InteractiveActor != ActorInSight)
 	{
@@ -149,7 +151,7 @@ bool UInteractionQueueComponent::StartInteraction()
 
 	if (bIsSuccess)
 	{
-		GetActorInteractionData(InteractiveActor, InteractionData);
+		UTrickyInteractionLibrary::GetActorInteractionData(InteractiveActor, InteractionData);
 		OnInteractionStarted.Broadcast(this, InteractiveActor, InteractionData);
 	}
 
@@ -222,7 +224,7 @@ bool UInteractionQueueComponent::ForceInteraction()
 	}
 
 	FInteractionData InteractionData;
-	GetActorInteractionData(InteractiveActor, InteractionData);
+	UTrickyInteractionLibrary::GetActorInteractionData(InteractiveActor, InteractionData);
 
 	if (InteractionData.bRequiresLineOfSight && InteractiveActor != ActorInSight)
 	{
@@ -250,28 +252,6 @@ void UInteractionQueueComponent::RegisterCamera(UCameraComponent* Camera)
 	ActorsToIgnore.AddUnique(CameraComponent->GetOwner());
 }
 
-bool UInteractionQueueComponent::IsActorInteractive(const AActor* Actor)
-{
-	if (!IsValid(Actor) || !Actor->Implements<UTrickyInteractionInterface>())
-	{
-		return false;
-	}
-
-	FInteractionData InteractionData;
-	return ITrickyInteractionInterface::Execute_GetInteractionData(Actor, InteractionData);
-}
-
-bool UInteractionQueueComponent::GetActorInteractionData(const AActor* InteractiveActor,
-                                                         FInteractionData& InteractionData)
-{
-	if (!IsValid(InteractiveActor) || !InteractiveActor->Implements<UTrickyInteractionInterface>())
-	{
-		return false;
-	}
-
-	return ITrickyInteractionInterface::Execute_GetInteractionData(InteractiveActor, InteractionData);
-}
-
 void UInteractionQueueComponent::SortInteractionQueue()
 {
 	if (InteractionQueue.Num() <= 1)
@@ -282,9 +262,9 @@ void UInteractionQueueComponent::SortInteractionQueue()
 	auto Predicate = [](const AActor* ActorA, const AActor* ActorB) -> bool
 	{
 		FInteractionData InteractionDataA;
-		GetActorInteractionData(ActorA, InteractionDataA);
+		UTrickyInteractionLibrary::GetActorInteractionData(ActorA, InteractionDataA);
 		FInteractionData InteractionDataB;
-		GetActorInteractionData(ActorB, InteractionDataB);
+		UTrickyInteractionLibrary::GetActorInteractionData(ActorB, InteractionDataB);
 		return InteractionDataA.InteractionWeight >= InteractionDataB.InteractionWeight;
 	};
 
@@ -301,7 +281,7 @@ void UInteractionQueueComponent::ToggleComponentTick()
 	SetComponentTickEnabled(bUseLineOfSight && !IsInteractionQueueEmpty() && !IsComponentTickEnabled());
 }
 
-void UInteractionQueueComponent::CheckLineOfSight(const float DeltaTime, FHitResult& OutHitResult)
+void UInteractionQueueComponent::CheckLineOfSight(const float DeltaTime, FHitResult& OutHitResult) const
 {
 	if (!IsValid(CameraComponent))
 	{
