@@ -94,3 +94,20 @@ UInteractionQueueComponent* UTrickyInteractionLibrary::GetInteractionQueueCompon
 
 	return Actor->FindComponentByClass<UInteractionQueueComponent>();
 }
+
+bool UTrickyInteractionLibrary::IsInInteractionQueue(const AActor* Interactor, AActor* Actor)
+{
+	if (!IsValid(Interactor) || !IsValid(Actor))
+	{
+		return false;
+	}
+
+	UInteractionQueueComponent* InteractionQueueComp = GetInteractionQueueComponent(Interactor);
+
+	if (!IsValid(InteractionQueueComp))
+	{
+		return false;
+	}
+
+	return InteractionQueueComp->IsInInteractionQueue(Actor);
+}

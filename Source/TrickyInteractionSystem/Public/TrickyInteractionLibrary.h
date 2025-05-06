@@ -32,6 +32,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="TrickyInteraction", meta=(WorldContext="Actor"))
 	static UInteractionQueueComponent* GetInteractionQueueComponent(const AActor* Actor);
 
+	UFUNCTION(BlueprintCallable, Category="TrickyInteraction", meta=(WorldContext="Actor"))
+	static bool IsInInteractionQueue(const AActor* Interactor, AActor* Actor);
+
 private:
 	const FString InteractionDataName = "InteractionData";
 };
