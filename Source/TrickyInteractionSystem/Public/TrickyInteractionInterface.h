@@ -47,21 +47,43 @@ class TRICKYINTERACTIONSYSTEM_API ITrickyInteractionInterface
 	GENERATED_BODY()
 
 public:
+	/**
+	 * Starts an interaction sequence by a give actor
+	 * @param Interactor The actor which initiated the sequence. Must be a valid actor
+	 * @return True if the sequence successfully started
+	 */
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category="TrickyInteraction")
 	bool StartInteraction(AActor* Interactor);
 
 	virtual bool StartInteraction_Implementation(AActor* Interactor);
 
+	/**
+	 * Interrupts an ongoing interaction sequence
+	 * @param Interruptor The actor attempting to interrupt the interaction. Must be a valid actor
+	 * @param Interactor The actor currently engaged in the interaction. Must be a valid actor
+	 * @return True if the interruption is successfully initiated
+	 */
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category="TrickyInteraction")
 	bool InterruptInteraction(AActor* Interruptor, AActor* Interactor);
 
 	virtual bool InterruptInteraction_Implementation(AActor* Interruptor, AActor* Interactor);
 
+	/**
+	 * Finishes an interaction sequence by a given actor
+	 * @param Interactor The actor which finishes the interaction. Must be a valid actor
+	 * @return True if the interaction sequence is successfully finished
+	 */
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category="TrickyInteraction")
 	bool FinishInteraction(AActor* Interactor);
 
 	virtual bool FinishInteraction_Implementation(AActor* Interactor);
 
+	/**
+	 * Forces the interaction sequence by a given actor
+	 * Usually used for immediate interactions which don't require any animations or time to interact
+	 * @param Interactor The actor which forced the interaction. Must be a valid actor
+	 * @return True if the interaction sequence is successfully forced
+	 */
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category="TrickyInteraction")
 	bool ForceInteraction(AActor* Interactor);
 
