@@ -66,9 +66,4 @@ public:
 	bool ForceInteraction(AActor* Interactor);
 
 	virtual bool ForceInteraction_Implementation(AActor* Interactor);
-
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category="TrickyInteraction")
-	bool GetInteractionData(FInteractionData& InteractionData) const;
-
-	virtual bool GetInteractionData_Implementation(FInteractionData& InteractionData) const;
 };

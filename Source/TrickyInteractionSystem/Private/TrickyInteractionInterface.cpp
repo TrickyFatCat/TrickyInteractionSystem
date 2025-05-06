@@ -23,8 +23,3 @@ bool ITrickyInteractionInterface::ForceInteraction_Implementation(AActor* Intera
 {
 	return false;
 }
-
-bool ITrickyInteractionInterface::GetInteractionData_Implementation(FInteractionData& InteractionData) const
-{
-	return false;
-}
