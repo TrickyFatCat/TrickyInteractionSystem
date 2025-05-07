@@ -24,9 +24,7 @@ bool UTrickyInteractionLibrary::GetActorInteractionData(const AActor* Actor, FIn
 	if (!IsValid(Actor) && !Actor->Implements<UTrickyInteractionInterface>())
 	{
 #if WITH_EDITOR && !UE_BUILD_SHIPPING
-		const bool bIsValidActor = IsValid(Actor);
-
-		if (bIsValidActor)
+		if (!IsValid(Actor))
 		{
 			const FString ActorName = Actor->GetActorNameOrLabel();
 			const FString Instruction = FString::Printf(
@@ -85,16 +83,12 @@ bool UTrickyInteractionLibrary::AddToInteractionQueue(AActor* Interactor, AActor
 	if (!IsValid(Interactor) || !IsValid(InteractiveActor))
 	{
 #if WITH_EDITOR && !UE_BUILD_SHIPPING
-		const bool bIsValidInteractor = IsValid(Interactor);
-
-		if (bIsValidInteractor)
+		if (!IsValid(Interactor))
 		{
 			PrintWarning("Can't add InteractiveActor to InteractionQueue. Interactor is invalid.");
 		}
 
-		const bool bIsValidInteractiveActor = IsValid(InteractiveActor);
-
-		if (bIsValidInteractiveActor)
+		if (!IsValid(InteractiveActor))
 		{
 			PrintWarning("Can't add InteractiveActor to InteractionQueue. InteractiveActor is invalid.");
 		}
@@ -126,16 +120,12 @@ bool UTrickyInteractionLibrary::RemoveFromInteractionQueue(AActor* Interactor, A
 	if (!IsValid(Interactor) || !IsValid(InteractiveActor))
 	{
 #if WITH_EDITOR && !UE_BUILD_SHIPPING
-		const bool bIsValidInteractor = IsValid(Interactor);
-
-		if (bIsValidInteractor)
+		if (!IsValid(Interactor))
 		{
 			PrintWarning("Can't remove InteractiveActor from InteractionQueue. Interactor is invalid.");
 		}
 
-		const bool bIsValidInteractiveActor = IsValid(InteractiveActor);
-
-		if (bIsValidInteractiveActor)
+		if (!IsValid(InteractiveActor))
 		{
 			PrintWarning("Can't remove InteractiveActor from InteractionQueue. InteractiveActor is invalid.");
 		}
@@ -177,16 +167,12 @@ bool UTrickyInteractionLibrary::IsInInteractionQueue(const AActor* Interactor, A
 	if (!IsValid(Interactor) || !IsValid(Actor))
 	{
 #if WITH_EDITOR && !UE_BUILD_SHIPPING
-		const bool bIsValidInteractor = IsValid(Interactor);
-
-		if (bIsValidInteractor)
+		if (!IsValid(Interactor))
 		{
 			PrintWarning("Can't check if Actor is in InteractionQueue. Interactor is invalid.");
 		}
 
-		const bool bIsValidActor = IsValid(Actor);
-
-		if (bIsValidActor)
+		if (!IsValid(Actor))
 		{
 			PrintWarning("Can't check if Actor is in InteractionQueue. Actor is invalid.");
 		}
