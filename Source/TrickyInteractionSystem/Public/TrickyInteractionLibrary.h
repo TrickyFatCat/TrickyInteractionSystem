@@ -6,6 +6,8 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "TrickyInteractionLibrary.generated.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogTrickyInteractionSystem, Log, All)
+
 struct FInteractionData;
 /**
  * 
@@ -36,5 +38,11 @@ public:
 	static bool IsInInteractionQueue(const AActor* Interactor, AActor* Actor);
 
 private:
-	const FString InteractionDataName = "InteractionData";
+#if WITH_EDITOR && !UE_BUILD_SHIPPING
+	static void PrintWarning(const FString& Message);
+
+	static void PrintError(const FString& Message);
+
+	static void PrintPropertyError(const AActor* Actor);
+#endif
 };
