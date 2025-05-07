@@ -53,6 +53,14 @@ void UInteractionQueueComponent::TickComponent(float DeltaTime,
 				const int32 Index = InteractionQueue.IndexOfByKey(ActorInSight);
 				InteractionQueue.Swap(Index, 0);
 			}
+			else
+			{
+				SortInteractionQueue();
+			}
+		}
+		else
+		{
+			SortInteractionQueue();
 		}
 	}
 }
@@ -260,7 +268,10 @@ void UInteractionQueueComponent::SortInteractionQueue()
 		UTrickyInteractionLibrary::GetActorInteractionData(ActorA, InteractionDataA);
 		FInteractionData InteractionDataB;
 		UTrickyInteractionLibrary::GetActorInteractionData(ActorB, InteractionDataB);
-		return InteractionDataA.InteractionWeight >= InteractionDataB.InteractionWeight;
+		const bool bWeightIsGreater = InteractionDataA.InteractionWeight >= InteractionDataB.InteractionWeight;
+		const bool bLineOfSightIsLesser = InteractionDataA.bRequiresLineOfSight <= InteractionDataB.bRequiresLineOfSight;
+		
+		return bWeightIsGreater && bLineOfSightIsLesser;
 	};
 
 	Algo::Sort(InteractionQueue, Predicate);

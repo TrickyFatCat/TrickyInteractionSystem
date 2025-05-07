@@ -28,7 +28,7 @@ bool UTrickyInteractionLibrary::GetActorInteractionData(const AActor* Actor, FIn
 		{
 			const FString ActorName = Actor->GetActorNameOrLabel();
 			const FString Instruction = FString::Printf(
-				"Please add UTrickyInteractionInterface to this actor if you want to use it as interactive actor.");
+				TEXT("Please add UTrickyInteractionInterface to this actor if you want to use it as interactive actor."));
 			const FString Message = FString::Printf(
 				TEXT("Actor %s does NOT implement UTrickyInteractionInterface.\n%s"), *ActorName, *Instruction);
 			PrintError(Message);
@@ -214,7 +214,7 @@ void UTrickyInteractionLibrary::PrintPropertyError(const AActor* Actor)
 {
 	const FString ActorName = Actor->GetActorNameOrLabel();
 	const FString Instruction = FString::Printf(
-		"Please add InteractionData variable to this actor if you want to use it as interactive actor.");
+		TEXT("Please add InteractionData variable to this actor if you want to use it as interactive actor."));
 	const FString Message = FString::Printf(
 		TEXT("Actor %s does NOT have InteractionData property.\n%s"), *ActorName, *Instruction);
 	PrintError(Message);
