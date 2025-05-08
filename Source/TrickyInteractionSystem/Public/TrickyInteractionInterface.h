@@ -26,6 +26,7 @@ struct FInteractionData
 	/**
 	 * Determines the interaction weight, which is used to sort the interaction queue
 	 * The higher the value, the higher the priority is.
+	 * @warning This property will be ignored if bRequiresLineOfSight == true
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="InteractionData", meta=(ClampMin=0, UIMin=0))
 	int32 InteractionWeight = 0;

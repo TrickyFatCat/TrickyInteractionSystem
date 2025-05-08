@@ -266,12 +266,13 @@ void UInteractionQueueComponent::SortInteractionQueue()
 	{
 		FInteractionData InteractionDataA;
 		UTrickyInteractionLibrary::GetActorInteractionData(ActorA, InteractionDataA);
+		const int32 WeightA = InteractionDataA.bRequiresLineOfSight ? -1 : InteractionDataA.InteractionWeight;
+		
 		FInteractionData InteractionDataB;
 		UTrickyInteractionLibrary::GetActorInteractionData(ActorB, InteractionDataB);
-		const bool bWeightIsGreater = InteractionDataA.InteractionWeight >= InteractionDataB.InteractionWeight;
-		const bool bLineOfSightIsLesser = InteractionDataA.bRequiresLineOfSight <= InteractionDataB.bRequiresLineOfSight;
+		const int32 WeightB = InteractionDataB.bRequiresLineOfSight ? -1 : InteractionDataB.InteractionWeight;
 		
-		return bWeightIsGreater && bLineOfSightIsLesser;
+		return WeightA >= WeightB;
 	};
 
 	Algo::Sort(InteractionQueue, Predicate);
