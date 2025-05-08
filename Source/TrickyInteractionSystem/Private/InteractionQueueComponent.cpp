@@ -9,6 +9,8 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 
+DEFINE_LOG_CATEGORY(LogInteractionQueueComponent);
+
 UInteractionQueueComponent::UInteractionQueueComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -23,7 +25,6 @@ void UInteractionQueueComponent::InitializeComponent()
 	SetComponentTickEnabled(false);
 	ActorsToIgnore.AddUnique(GetOwner());
 }
-
 
 void UInteractionQueueComponent::TickComponent(float DeltaTime,
                                                ELevelTick TickType,
@@ -65,7 +66,6 @@ void UInteractionQueueComponent::TickComponent(float DeltaTime,
 	}
 }
 
-
 bool UInteractionQueueComponent::AddToInteractionQueue(AActor* InteractiveActor)
 {
 	if (!UTrickyInteractionLibrary::IsActorInteractive(InteractiveActor) || IsInInteractionQueue(InteractiveActor))
@@ -82,6 +82,14 @@ bool UInteractionQueueComponent::AddToInteractionQueue(AActor* InteractiveActor)
 	}
 
 	OnActorAddedToInteractionQueue.Broadcast(this, InteractiveActor);
+
+#if WITH_EDITOR && !UE_BUILD_SHIPPING
+	FString ActorName, OwnerName = GetOwner()->GetActorNameOrLabel();
+	GetNames(OwnerName, InteractiveActor, ActorName);
+	const FString Message = FString::Printf(TEXT("%s added to InteractionQueue of %s"), *ActorName, *OwnerName);
+	PrintLog(Message);
+#endif
+
 	return true;
 }
 
@@ -107,9 +115,15 @@ bool UInteractionQueueComponent::RemoveFromInteractionQueue(AActor* InteractiveA
 		SetComponentTickEnabled(false);
 	}
 
+#if WITH_EDITOR && !UE_BUILD_SHIPPING
+	FString ActorName, OwnerName = GetOwner()->GetActorNameOrLabel();
+	GetNames(OwnerName, InteractiveActor, ActorName);
+	const FString Message = FString::Printf(TEXT("%s removed from InteractionQueue of %s"), *ActorName, *OwnerName);
+	PrintLog(Message);
+#endif
+
 	return true;
 }
-
 
 bool UInteractionQueueComponent::IsInInteractionQueue(AActor* Actor)
 {
@@ -156,12 +170,17 @@ bool UInteractionQueueComponent::StartInteraction()
 	}
 
 	const bool bIsSuccess = ITrickyInteractionInterface::Execute_StartInteraction(InteractiveActor, Interactor);
+	UTrickyInteractionLibrary::GetActorInteractionData(InteractiveActor, InteractionData);
+	OnInteractionStarted.Broadcast(this, InteractiveActor, bIsSuccess);
 
-	if (bIsSuccess)
-	{
-		UTrickyInteractionLibrary::GetActorInteractionData(InteractiveActor, InteractionData);
-		OnInteractionStarted.Broadcast(this, InteractiveActor, InteractionData);
-	}
+#if WITH_EDITOR && !UE_BUILD_SHIPPING
+	FString ActorName, OwnerName = GetOwner()->GetActorNameOrLabel();
+	GetNames(OwnerName, InteractiveActor, ActorName);
+	const FString Result = bIsSuccess ? TEXT("Success") : TEXT("Failure");
+	const FString Message = FString::Printf(
+		TEXT("%s started interaction with %s. Result %s"), *OwnerName, *ActorName, *Result);
+	PrintLog(Message);
+#endif
 
 	return bIsSuccess;
 }
@@ -184,6 +203,16 @@ bool UInteractionQueueComponent::FinishInteraction()
 
 	const bool bIsSuccess = ITrickyInteractionInterface::Execute_FinishInteraction(InteractiveActor, Interactor);
 	OnInteractionFinished.Broadcast(this, InteractiveActor, bIsSuccess);
+
+#if WITH_EDITOR && !UE_BUILD_SHIPPING
+	FString ActorName, OwnerName = GetOwner()->GetActorNameOrLabel();
+	GetNames(OwnerName, InteractiveActor, ActorName);
+	const FString Result = bIsSuccess ? TEXT("Success") : TEXT("Failure");
+	const FString Message = FString::Printf(
+		TEXT("%s finished interaction with %s. Result %s"), *OwnerName, *ActorName, *Result);
+	PrintLog(Message);
+#endif
+
 	return bIsSuccess;
 }
 
@@ -203,14 +232,19 @@ bool UInteractionQueueComponent::InterruptInteraction(AActor* Interruptor)
 		return false;
 	}
 
-	const bool bIsSuccess = ITrickyInteractionInterface::Execute_InterruptInteraction(InteractiveActor,
-		Interruptor,
-		Interactor);
+	const bool bIsSuccess = ITrickyInteractionInterface::Execute_InterruptInteraction(
+		InteractiveActor, Interruptor, Interactor);
+	OnInteractionInterrupted.Broadcast(this, InteractiveActor, Interruptor, bIsSuccess);
 
-	if (bIsSuccess)
-	{
-		OnInteractionInterrupted.Broadcast(this, InteractiveActor, Interruptor);
-	}
+#if WITH_EDITOR && !UE_BUILD_SHIPPING
+	FString ActorName, OwnerName = GetOwner()->GetActorNameOrLabel();
+	GetNames(OwnerName, InteractiveActor, ActorName);
+	const FString InterruptorName = Interruptor->GetActorNameOrLabel();
+	const FString Result = bIsSuccess ? TEXT("Success") : TEXT("Failure");
+	const FString Message = FString::Printf(
+		TEXT("%s interrupts %s interaction with %s. Result: %s"), *InterruptorName, *OwnerName, *ActorName, *Result);
+	PrintLog(Message);
+#endif
 
 	return bIsSuccess;
 }
@@ -241,6 +275,16 @@ bool UInteractionQueueComponent::ForceInteraction()
 
 	const bool bIsSuccess = ITrickyInteractionInterface::Execute_ForceInteraction(InteractiveActor, Interactor);
 	OnInteractionForced.Broadcast(this, InteractiveActor, bIsSuccess);
+
+#if WITH_EDITOR && !UE_BUILD_SHIPPING
+	FString ActorName, OwnerName = GetOwner()->GetActorNameOrLabel();
+	GetNames(OwnerName, InteractiveActor, ActorName);
+	const FString Result = bIsSuccess ? TEXT("Success") : TEXT("Failure");
+	const FString Message = FString::Printf(
+		TEXT("%s forced interaction with %s. Result %s"), *OwnerName, *ActorName, *Result);
+	PrintLog(Message);
+#endif
+
 	return bIsSuccess;
 }
 
@@ -249,6 +293,11 @@ void UInteractionQueueComponent::RegisterCamera(UCameraComponent* Camera)
 	if (!IsValid(Camera))
 	{
 		return;
+	}
+
+	if (IsValid(CameraComponent))
+	{
+		ActorsToIgnore.Remove(CameraComponent->GetOwner());
 	}
 
 	CameraComponent = Camera;
@@ -267,11 +316,11 @@ void UInteractionQueueComponent::SortInteractionQueue()
 		FInteractionData InteractionDataA;
 		UTrickyInteractionLibrary::GetActorInteractionData(ActorA, InteractionDataA);
 		const int32 WeightA = InteractionDataA.bRequiresLineOfSight ? -1 : InteractionDataA.InteractionWeight;
-		
+
 		FInteractionData InteractionDataB;
 		UTrickyInteractionLibrary::GetActorInteractionData(ActorB, InteractionDataB);
 		const int32 WeightB = InteractionDataB.bRequiresLineOfSight ? -1 : InteractionDataB.InteractionWeight;
-		
+
 		return WeightA >= WeightB;
 	};
 
@@ -282,6 +331,15 @@ void UInteractionQueueComponent::ToggleComponentTick()
 {
 	if (!IsValid(CameraComponent))
 	{
+#if WITH_EDITOR && !UE_BUILD_SHIPPING
+		const FString OwnerName = GetOwner()->GetActorNameOrLabel();
+		const FString Instruction = FString::Printf(
+			TEXT("Please register valid CameraComponent in InteractionQueueComponent of %s"), *OwnerName);
+		const FString Message = FString::Printf(
+			TEXT("Can't toggle InteractionQueueComponent tick in %s. CameraComponent is invalid.\n%s"),
+			*OwnerName,
+			*Instruction);
+#endif
 		return;
 	}
 
@@ -315,3 +373,26 @@ void UInteractionQueueComponent::CheckLineOfSight(const float DeltaTime, FHitRes
 	                                        TraceHitColor,
 	                                        DrawTime);
 }
+
+#if WITH_EDITOR && !UE_BUILD_SHIPPING
+void UInteractionQueueComponent::PrintLog(const FString& Message)
+{
+	UE_LOG(LogInteractionQueueComponent, Log, TEXT("%s"), *Message);
+}
+
+void UInteractionQueueComponent::PrintWarning(const FString& Message)
+{
+	UE_LOG(LogInteractionQueueComponent, Warning, TEXT("%s"), *Message);
+}
+
+void UInteractionQueueComponent::PrintError(const FString& Message)
+{
+	UE_LOG(LogInteractionQueueComponent, Error, TEXT("%s"), *Message);
+}
+
+void UInteractionQueueComponent::GetNames(FString& OutOwnerName, const AActor* Actor, FString& OutActorName) const
+{
+	OutOwnerName = GetOwner()->GetActorNameOrLabel();
+	OutActorName = IsValid(Actor) ? Actor->GetActorNameOrLabel() : TEXT("NULL");
+}
+#endif

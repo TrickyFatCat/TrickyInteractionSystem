@@ -15,6 +15,8 @@ namespace EDrawDebugTrace
 class UCameraComponent;
 struct FInteractionData;
 
+DECLARE_LOG_CATEGORY_EXTERN(LogInteractionQueueComponent, Log, All)
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActorAddedToInteractionQueueDynamicSignature,
                                              UInteractionQueueComponent*, Component,
                                              AActor*, InteractiveActor);
@@ -26,17 +28,18 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActorRemovedFromInteractionQueue
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnInteractionStartedDynamicSignature,
                                                UInteractionQueueComponent*, Component,
                                                AActor*, InteractiveActor,
-                                               const FInteractionData&, InteractionData);
+                                               bool, bIsSuccessful);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnInteractionFinishedDynamicSignature,
                                                UInteractionQueueComponent*, Component,
                                                AActor*, InteractievActor,
                                                bool, bIsSuccessful);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnInteractionInterruptedDynamicSignature,
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnInteractionInterruptedDynamicSignature,
                                                UInteractionQueueComponent*, Component,
                                                AActor*, InteractiveActor,
-                                               AActor*, Interruptor);
+                                               AActor*, Interruptor,
+                                               bool, bIsSuccessful);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnInteractionForcedDynamicSignature,
                                                UInteractionQueueComponent*, Component,
@@ -72,19 +75,19 @@ public:
 	FOnActorRemovedFromInteractionQueueDynamicSignature OnActorRemovedFromInteractionQueue;
 
 	/**
-	 * Called when interaction successfully started
+	 * Called when interaction is started
 	 */
 	UPROPERTY(BlueprintAssignable, Category="InteractionQueue")
 	FOnInteractionStartedDynamicSignature OnInteractionStarted;
 
 	/**
-	 * Called when interaction finished
+	 * Called when interaction is finished
 	 */
 	UPROPERTY(BlueprintAssignable, Category="InteractionQueue")
 	FOnInteractionFinishedDynamicSignature OnInteractionFinished;
 
 	/**
-	 * Called when interaction successfully interrupted
+	 * Called when interaction is interrupted
 	 */
 	UPROPERTY(BlueprintAssignable, Category="InteractionQueue")
 	FOnInteractionInterruptedDynamicSignature OnInteractionInterrupted;
@@ -240,4 +243,14 @@ private:
 	void ToggleComponentTick();
 
 	void CheckLineOfSight(const float DeltaTime, FHitResult& OutHitResult) const;
+
+#if WITH_EDITOR && !UE_BUILD_SHIPPING
+	void PrintLog(const FString& Message);
+	
+	void PrintWarning(const FString& Message);
+	
+	void PrintError(const FString& Message);
+
+	void GetNames(FString& OutOwnerName, const AActor* Actor, FString& OutActorName) const;
+#endif
 };
