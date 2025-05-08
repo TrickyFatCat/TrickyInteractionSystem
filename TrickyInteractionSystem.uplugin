@@ -3,7 +3,7 @@
 	"Version": 1,
 	"VersionName": "3.55.0",
 	"FriendlyName": "TrickyInteractionSystem",
-	"Description": "",
+	"Description": "Provides a simple interaction system.",
 	"Category": "Tricky Prototyping",
 	"CreatedBy": "Artyom \"Tricky_Fat_Cat\" Volkov",
 	"CreatedByURL": "",
