@@ -19,10 +19,10 @@ class TRICKYINTERACTIONSYSTEM_API UTrickyInteractionLibrary : public UBlueprintF
 
 public:
 	UFUNCTION(BlueprintPure, Category="TrickyInteraction", meta=(WorldContext="Actor"))
-	static bool IsActorInteractive(const AActor* Actor);
+	static bool IsActorInteractive(AActor* Actor);
 
 	UFUNCTION(BlueprintCallable, Category="TrickyInteraction", meta=(WorldContext="Actor"))
-	static bool GetActorInteractionData(const AActor* Actor,
+	static bool GetActorInteractionData(AActor* Actor,
 	                                    FInteractionData& InteractionData);
 
 	UFUNCTION(BlueprintCallable, Category="TrickyInteraction", meta=(WorldContext="Actor"))

@@ -5,10 +5,11 @@
 
 #include "InteractionQueueComponent.h"
 #include "TrickyInteractionInterface.h"
+#include "GameFramework/Actor.h"
 
 DEFINE_LOG_CATEGORY(LogTrickyInteractionSystem);
 
-bool UTrickyInteractionLibrary::IsActorInteractive(const AActor* Actor)
+bool UTrickyInteractionLibrary::IsActorInteractive(AActor* Actor)
 {
 	if (!IsValid(Actor) || !Actor->Implements<UTrickyInteractionInterface>())
 	{
@@ -19,7 +20,7 @@ bool UTrickyInteractionLibrary::IsActorInteractive(const AActor* Actor)
 	return GetActorInteractionData(Actor, InteractionData);
 }
 
-bool UTrickyInteractionLibrary::GetActorInteractionData(const AActor* Actor, FInteractionData& InteractionData)
+bool UTrickyInteractionLibrary::GetActorInteractionData(AActor* Actor, FInteractionData& InteractionData)
 {
 	if (!IsValid(Actor) && !Actor->Implements<UTrickyInteractionInterface>())
 	{

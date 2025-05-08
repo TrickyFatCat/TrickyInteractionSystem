@@ -323,7 +323,7 @@ void UInteractionQueueComponent::SortInteractionQueue()
 		return;
 	}
 
-	auto Predicate = [](const AActor* ActorA, const AActor* ActorB) -> bool
+	auto Predicate = [](AActor* ActorA, AActor* ActorB) -> bool
 	{
 		FInteractionData InteractionDataA;
 		UTrickyInteractionLibrary::GetActorInteractionData(ActorA, InteractionDataA);
