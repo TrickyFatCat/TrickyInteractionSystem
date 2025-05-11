@@ -14,6 +14,7 @@ namespace EDrawDebugTrace
 
 class UCameraComponent;
 struct FInteractionData;
+enum class EInteractionResult : uint8;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogInteractionQueueComponent, Log, All)
 
@@ -28,23 +29,23 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActorRemovedFromInteractionQueue
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnInteractionStartedDynamicSignature,
                                                UInteractionQueueComponent*, Component,
                                                AActor*, InteractiveActor,
-                                               bool, bIsSuccessful);
+                                               EInteractionResult, InteractionResult);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnInteractionFinishedDynamicSignature,
                                                UInteractionQueueComponent*, Component,
                                                AActor*, InteractievActor,
-                                               bool, bIsSuccessful);
+                                               EInteractionResult, InteractionResult);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnInteractionInterruptedDynamicSignature,
                                                UInteractionQueueComponent*, Component,
                                                AActor*, InteractiveActor,
                                                AActor*, Interruptor,
-                                               bool, bIsSuccessful);
+                                               EInteractionResult, InteractionResult);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnInteractionForcedDynamicSignature,
                                                UInteractionQueueComponent*, Component,
                                                AActor*, InteractiveActor,
-                                               bool, bIsSuccessful);
+                                               EInteractionResult, InteractionResult);
 
 UCLASS(ClassGroup=(TrickyInteractionSystem), meta=(BlueprintSpawnableComponent))
 class TRICKYINTERACTIONSYSTEM_API UInteractionQueueComponent : public UActorComponent
@@ -142,30 +143,30 @@ public:
 	 * @return result of the interaction start
 	 */
 	UFUNCTION(BlueprintCallable, Category="InteractionQueue")
-	bool StartInteraction();
+	EInteractionResult StartInteraction();
 
 	/**
 	 * Starts interaction with the first actor in the interaction queue
 	 * @return result of the interaction finish
 	 */
 	UFUNCTION(BlueprintCallable, Category="InteractionQueue")
-	bool FinishInteraction();
+	EInteractionResult FinishInteraction();
 
 	/**
 	 * Interrupts current interaction sequence
 	 * @param Interruptor An actor which interrupts the interaction
-	 * @return true if the interaction is successfully interrupted
+	 * @return result of the interaction interruption
 	 */
 	UFUNCTION(BlueprintCallable, Category="InteractionQueue")
-	bool InterruptInteraction(AActor* Interruptor);
+	EInteractionResult InterruptInteraction(AActor* Interruptor);
 
 	/**
-	 * Forces interaction with the first actor in the interaciton queue
+	 * Forces interaction with the first actor in the interaction queue
 	 * Usually used for immediate interactions which don't require animations
-	 * @return result of the interaciton
+	 * @return result of the interaction
 	 */
 	UFUNCTION(BlueprintCallable, Category="InteractionQueue")
-	bool ForceInteraction();
+	EInteractionResult ForceInteraction();
 
 	/**
 	 * Registers a camera which will be used for the line of sight check
@@ -252,5 +253,7 @@ private:
 	void PrintError(const FString& Message);
 
 	void GetNames(FString& OutOwnerName, const AActor* Actor, FString& OutActorName) const;
+
+	static void GetInteractionResultName(EInteractionResult Result, FString& OutResultName);
 #endif
 };

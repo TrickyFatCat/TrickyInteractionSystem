@@ -145,20 +145,20 @@ void UInteractionQueueComponent::SetUseLineOfSight(bool Value)
 	bUseLineOfSight = Value;
 }
 
-bool UInteractionQueueComponent::StartInteraction()
+EInteractionResult UInteractionQueueComponent::StartInteraction()
 {
 	AActor* Interactor = GetOwner();
 
 	if (IsInteractionQueueEmpty() || !IsValid(Interactor))
 	{
-		return false;
+		return EInteractionResult::Invalid;
 	}
 
 	AActor* InteractiveActor = InteractionQueue[0];
 
 	if (!IsValid(InteractiveActor))
 	{
-		return false;
+		return EInteractionResult::Invalid;
 	}
 
 	FInteractionData InteractionData;
@@ -166,7 +166,7 @@ bool UInteractionQueueComponent::StartInteraction()
 
 	if (InteractionData.bRequiresLineOfSight && InteractiveActor != ActorInSight)
 	{
-		return false;
+		return EInteractionResult::Invalid;
 	}
 
 #if WITH_EDITOR && !UE_BUILD_SHIPPING
@@ -174,34 +174,35 @@ bool UInteractionQueueComponent::StartInteraction()
 	GetNames(OwnerName, InteractiveActor, ActorName);
 #endif
 
-	const bool bIsSuccess = ITrickyInteractionInterface::Execute_StartInteraction(InteractiveActor, Interactor);
+	const EInteractionResult InteractionResult = ITrickyInteractionInterface::Execute_StartInteraction(InteractiveActor, Interactor);
 	UTrickyInteractionLibrary::GetActorInteractionData(InteractiveActor, InteractionData);
-	OnInteractionStarted.Broadcast(this, InteractiveActor, bIsSuccess);
+	OnInteractionStarted.Broadcast(this, InteractiveActor, InteractionResult);
 
 #if WITH_EDITOR && !UE_BUILD_SHIPPING
-	const FString Result = bIsSuccess ? TEXT("Success") : TEXT("Failure");
+	FString Result = "NONE";
+	GetInteractionResultName(InteractionResult, Result);
 	const FString Message = FString::Printf(
 		TEXT("%s started interaction with %s. Result %s"), *OwnerName, *ActorName, *Result);
 	PrintLog(Message);
 #endif
 
-	return bIsSuccess;
+	return InteractionResult;
 }
 
-bool UInteractionQueueComponent::FinishInteraction()
+EInteractionResult UInteractionQueueComponent::FinishInteraction()
 {
 	AActor* Interactor = GetOwner();
 
 	if (IsInteractionQueueEmpty() || !IsValid(Interactor))
 	{
-		return false;
+		return EInteractionResult::Invalid;
 	}
 
 	AActor* InteractiveActor = InteractionQueue[0];
 
 	if (!IsValid(InteractiveActor))
 	{
-		return false;
+		return EInteractionResult::Invalid;
 	}
 
 #if WITH_EDITOR && !UE_BUILD_SHIPPING
@@ -209,33 +210,34 @@ bool UInteractionQueueComponent::FinishInteraction()
 	GetNames(OwnerName, InteractiveActor, ActorName);
 #endif
 	
-	const bool bIsSuccess = ITrickyInteractionInterface::Execute_FinishInteraction(InteractiveActor, Interactor);
-	OnInteractionFinished.Broadcast(this, InteractiveActor, bIsSuccess);
+	const EInteractionResult InteractionResult = ITrickyInteractionInterface::Execute_FinishInteraction(InteractiveActor, Interactor);
+	OnInteractionFinished.Broadcast(this, InteractiveActor, InteractionResult);
 
 #if WITH_EDITOR && !UE_BUILD_SHIPPING
-	const FString Result = bIsSuccess ? TEXT("Success") : TEXT("Failure");
+	FString Result = "NONE";
+	GetInteractionResultName(InteractionResult, Result);
 	const FString Message = FString::Printf(
 		TEXT("%s finished interaction with %s. Result %s"), *OwnerName, *ActorName, *Result);
 	PrintLog(Message);
 #endif
 
-	return bIsSuccess;
+	return InteractionResult;
 }
 
-bool UInteractionQueueComponent::InterruptInteraction(AActor* Interruptor)
+EInteractionResult UInteractionQueueComponent::InterruptInteraction(AActor* Interruptor)
 {
 	AActor* Interactor = GetOwner();
 
 	if (IsInteractionQueueEmpty() || !IsValid(Interactor))
 	{
-		return false;
+		return EInteractionResult::Invalid;
 	}
 
 	AActor* InteractiveActor = InteractionQueue[0];
 
 	if (!IsValid(InteractiveActor))
 	{
-		return false;
+		return EInteractionResult::Invalid;
 	}
 
 #if WITH_EDITOR && !UE_BUILD_SHIPPING
@@ -243,35 +245,36 @@ bool UInteractionQueueComponent::InterruptInteraction(AActor* Interruptor)
 	GetNames(OwnerName, InteractiveActor, ActorName);
 #endif
 	
-	const bool bIsSuccess = ITrickyInteractionInterface::Execute_InterruptInteraction(
+	const EInteractionResult InteractionResult = ITrickyInteractionInterface::Execute_InterruptInteraction(
 		InteractiveActor, Interruptor, Interactor);
-	OnInteractionInterrupted.Broadcast(this, InteractiveActor, Interruptor, bIsSuccess);
+	OnInteractionInterrupted.Broadcast(this, InteractiveActor, Interruptor, InteractionResult);
 
 #if WITH_EDITOR && !UE_BUILD_SHIPPING
 	const FString InterruptorName = Interruptor->GetActorNameOrLabel();
-	const FString Result = bIsSuccess ? TEXT("Success") : TEXT("Failure");
+	FString Result = "NONE";
+	GetInteractionResultName(InteractionResult, Result);
 	const FString Message = FString::Printf(
 		TEXT("%s interrupts %s interaction with %s. Result: %s"), *InterruptorName, *OwnerName, *ActorName, *Result);
 	PrintLog(Message);
 #endif
 
-	return bIsSuccess;
+	return InteractionResult;
 }
 
-bool UInteractionQueueComponent::ForceInteraction()
+EInteractionResult UInteractionQueueComponent::ForceInteraction()
 {
 	AActor* Interactor = GetOwner();
 
 	if (IsInteractionQueueEmpty() || !IsValid(Interactor))
 	{
-		return false;
+		return EInteractionResult::Invalid;
 	}
 
 	AActor* InteractiveActor = InteractionQueue[0];
 
 	if (!IsValid(InteractiveActor))
 	{
-		return false;
+		return EInteractionResult::Invalid;
 	}
 
 	FInteractionData InteractionData;
@@ -279,7 +282,7 @@ bool UInteractionQueueComponent::ForceInteraction()
 
 	if (InteractionData.bRequiresLineOfSight && InteractiveActor != ActorInSight)
 	{
-		return false;
+		return EInteractionResult::Invalid;
 	}
 
 #if WITH_EDITOR && !UE_BUILD_SHIPPING
@@ -287,17 +290,18 @@ bool UInteractionQueueComponent::ForceInteraction()
 	GetNames(OwnerName, InteractiveActor, ActorName);
 #endif
 	
-	const bool bIsSuccess = ITrickyInteractionInterface::Execute_ForceInteraction(InteractiveActor, Interactor);
-	OnInteractionForced.Broadcast(this, InteractiveActor, bIsSuccess);
+	const EInteractionResult InteractionResult = ITrickyInteractionInterface::Execute_ForceInteraction(InteractiveActor, Interactor);
+	OnInteractionForced.Broadcast(this, InteractiveActor, InteractionResult);
 
 #if WITH_EDITOR && !UE_BUILD_SHIPPING
-	const FString Result = bIsSuccess ? TEXT("Success") : TEXT("Failure");
+	FString Result = "NONE";
+	GetInteractionResultName(InteractionResult, Result);
 	const FString Message = FString::Printf(
 		TEXT("%s forced interaction with %s. Result %s"), *OwnerName, *ActorName, *Result);
 	PrintLog(Message);
 #endif
 
-	return bIsSuccess;
+	return InteractionResult;
 }
 
 void UInteractionQueueComponent::RegisterCamera(UCameraComponent* Camera)
@@ -406,5 +410,10 @@ void UInteractionQueueComponent::GetNames(FString& OutOwnerName, const AActor* A
 {
 	OutOwnerName = GetOwner()->GetActorNameOrLabel();
 	OutActorName = IsValid(Actor) ? Actor->GetActorNameOrLabel() : TEXT("NULL");
+}
+
+void UInteractionQueueComponent::GetInteractionResultName(EInteractionResult Result, FString& OutResultName)
+{
+	OutResultName = StaticEnum<EInteractionResult>()->GetNameStringByValue(static_cast<int64>(Result));
 }
 #endif

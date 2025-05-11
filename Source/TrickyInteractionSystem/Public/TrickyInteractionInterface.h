@@ -32,6 +32,16 @@ struct FInteractionData
 	int32 InteractionWeight = 0;
 };
 
+/**
+ * Represents the result of an interaction
+ */
+UENUM(Blueprintable)
+enum class EInteractionResult : uint8
+{
+	Success,
+	Failure,
+	Invalid
+};
 
 // This class does not need to be modified.
 UINTERFACE()
@@ -51,42 +61,42 @@ public:
 	/**
 	 * Starts an interaction sequence by a give actor
 	 * @param Interactor The actor which initiated the sequence. Must be a valid actor
-	 * @return True if the sequence successfully started
+	 * @return result of the interaction start
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category="TrickyInteraction")
-	bool StartInteraction(AActor* Interactor);
+	EInteractionResult StartInteraction(AActor* Interactor);
 
-	virtual bool StartInteraction_Implementation(AActor* Interactor);
+	virtual EInteractionResult StartInteraction_Implementation(AActor* Interactor);
 
 	/**
 	 * Interrupts an ongoing interaction sequence
 	 * @param Interruptor The actor attempting to interrupt the interaction. Must be a valid actor
 	 * @param Interactor The actor currently engaged in the interaction. Must be a valid actor
-	 * @return True if the interruption is successfully initiated
+	 * @return result of the interaction finish
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category="TrickyInteraction")
-	bool InterruptInteraction(AActor* Interruptor, AActor* Interactor);
+	EInteractionResult InterruptInteraction(AActor* Interruptor, AActor* Interactor);
 
-	virtual bool InterruptInteraction_Implementation(AActor* Interruptor, AActor* Interactor);
+	virtual EInteractionResult InterruptInteraction_Implementation(AActor* Interruptor, AActor* Interactor);
 
 	/**
 	 * Finishes an interaction sequence by a given actor
 	 * @param Interactor The actor which finishes the interaction. Must be a valid actor
-	 * @return True if the interaction sequence is successfully finished
+	 * @return result of the interaction interruption
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category="TrickyInteraction")
-	bool FinishInteraction(AActor* Interactor);
+	EInteractionResult FinishInteraction(AActor* Interactor);
 
-	virtual bool FinishInteraction_Implementation(AActor* Interactor);
+	virtual EInteractionResult FinishInteraction_Implementation(AActor* Interactor);
 
 	/**
 	 * Forces the interaction sequence by a given actor
 	 * Usually used for immediate interactions which don't require any animations or time to interact
 	 * @param Interactor The actor which forced the interaction. Must be a valid actor
-	 * @return True if the interaction sequence is successfully forced
+	 * @return of the forced interaction
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category="TrickyInteraction")
-	bool ForceInteraction(AActor* Interactor);
+	EInteractionResult ForceInteraction(AActor* Interactor);
 
-	virtual bool ForceInteraction_Implementation(AActor* Interactor);
+	virtual EInteractionResult ForceInteraction_Implementation(AActor* Interactor);
 };

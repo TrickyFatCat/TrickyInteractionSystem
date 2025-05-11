@@ -4,22 +4,22 @@
 #include "TrickyInteractionInterface.h"
 
 
-bool ITrickyInteractionInterface::StartInteraction_Implementation(AActor* Interactor)
+EInteractionResult ITrickyInteractionInterface::StartInteraction_Implementation(AActor* Interactor)
 {
-	return false;
+	return EInteractionResult::Invalid;
 }
 
-bool ITrickyInteractionInterface::InterruptInteraction_Implementation(AActor* Interruptor, AActor* Interactor)
+EInteractionResult ITrickyInteractionInterface::InterruptInteraction_Implementation(AActor* Interruptor, AActor* Interactor)
 {
-	return false;
+	return EInteractionResult::Invalid;
 }
 
-bool ITrickyInteractionInterface::FinishInteraction_Implementation(AActor* Interactor)
+EInteractionResult ITrickyInteractionInterface::FinishInteraction_Implementation(AActor* Interactor)
 {
-	return false;
+	return EInteractionResult::Invalid;
 }
 
-bool ITrickyInteractionInterface::ForceInteraction_Implementation(AActor* Interactor)
+EInteractionResult ITrickyInteractionInterface::ForceInteraction_Implementation(AActor* Interactor)
 {
-	return false;
+	return EInteractionResult::Invalid;
 }
