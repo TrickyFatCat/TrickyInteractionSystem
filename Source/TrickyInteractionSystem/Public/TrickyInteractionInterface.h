@@ -63,7 +63,7 @@ public:
 	 * @param Interactor The actor which initiated the sequence. Must be a valid actor
 	 * @return result of the interaction start
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category="TrickyInteraction")
+	UFUNCTION(BlueprintNativeEvent, Category="TrickyInteraction")
 	EInteractionResult StartInteraction(AActor* Interactor);
 
 	virtual EInteractionResult StartInteraction_Implementation(AActor* Interactor);
@@ -74,7 +74,7 @@ public:
 	 * @param Interactor The actor currently engaged in the interaction. Must be a valid actor
 	 * @return result of the interaction finish
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category="TrickyInteraction")
+	UFUNCTION(BlueprintNativeEvent, Category="TrickyInteraction")
 	EInteractionResult InterruptInteraction(AActor* Interruptor, AActor* Interactor);
 
 	virtual EInteractionResult InterruptInteraction_Implementation(AActor* Interruptor, AActor* Interactor);
@@ -84,7 +84,7 @@ public:
 	 * @param Interactor The actor which finishes the interaction. Must be a valid actor
 	 * @return result of the interaction interruption
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category="TrickyInteraction")
+	UFUNCTION(BlueprintNativeEvent, Category="TrickyInteraction")
 	EInteractionResult FinishInteraction(AActor* Interactor);
 
 	virtual EInteractionResult FinishInteraction_Implementation(AActor* Interactor);
@@ -95,7 +95,7 @@ public:
 	 * @param Interactor The actor which forced the interaction. Must be a valid actor
 	 * @return of the forced interaction
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category="TrickyInteraction")
+	UFUNCTION(BlueprintNativeEvent, Category="TrickyInteraction")
 	EInteractionResult ForceInteraction(AActor* Interactor);
 
 	virtual EInteractionResult ForceInteraction_Implementation(AActor* Interactor);
